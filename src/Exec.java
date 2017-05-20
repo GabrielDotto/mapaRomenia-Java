@@ -24,20 +24,33 @@ public class Exec {
         
         Exec executa = new Exec();
         
-        executa.percorreMapa("Oradea", "Eforie");
+        executa.percorreMapa("Sibiu", "Neamt");
     	
     }
     
     
-    private void imprimeRota(List<Cidade> cidades){
-        	
-        StringBuilder out = new StringBuilder();
-        int custo = 0;
-        for (Cidade cidade : cidades) {
-            out.append(cidade.getNome());
-            out.append(" - ");   
-        }        
-        System.out.println( out.toString());	
+    private void imprimeRota(List<String> percurso){
+    	
+    	Cidade cidade = null;
+    	Cidade cidadeAnterior = null;
+    	int custo = 0;
+    	
+    	Mapa mapa = new Mapa();
+    	mapa.carregarMapa();
+    	
+    	for (String p : percurso){
+    		
+    		cidade = mapa.cidadePorNome(p);
+    		
+    		for(Vizinho vizinho : cidade.getVizinhos()){
+    			if(vizinho.getCidade() == cidadeAnterior){
+    				custo += vizinho.getDistancia();
+    			}
+    		}
+    		cidadeAnterior = cidade;
+    		System.out.println(p);   	
+    	}  	
+    	System.out.println(custo);
     }
     
     
@@ -46,28 +59,27 @@ public class Exec {
     	Mapa mapa = new Mapa();
         mapa.carregarMapa();
         
-    	int custo = 0;
+    	
     	Cidade localPartida  = mapa.cidadePorNome(local);
     	Cidade localDestino = mapa.cidadePorNome(destino);
     	Cidade posicaoAtual = null;
     	
     	HashSet<Cidade> visitados = new HashSet<>();
-    	Stack<Cidade> caminho = new Stack<>();
+    	Stack<Cidade> caminho = new Stack<>();	
+    	Stack<String> percurso = new Stack<>();
+
      	
-    	
-        
-        
-        
-        
+
     	posicaoAtual = localPartida;
     	caminho.add(posicaoAtual);
+    	percurso.add(posicaoAtual.getNome());
+		
     	
 		while( ! posicaoAtual.equals(localDestino) ){
-			
-			System.out.print(posicaoAtual.getNome() + " ");	
-		    
-		    visitados.add(posicaoAtual);   
-		    
+			    
+			visitados.add(posicaoAtual);
+		    System.out.println(percurso);
+//		    System.out.println("caminho - " + caminho);
 			for(Vizinho vizinho: posicaoAtual.getVizinhos())
 			{
     			if( ! vizinho.getCidade().equals(localDestino)){
@@ -78,14 +90,25 @@ public class Exec {
         		}
     			else{
     				posicaoAtual = vizinho.getCidade();
+    				percurso.add(posicaoAtual.getNome());
+    				imprimeRota(percurso);
     				break;
     			}
     		} 
 			
 			if(posicaoAtual != localDestino){
-				posicaoAtual = caminho.pop();
+				
+				if(visitados.contains(caminho.lastElement())){
+					
+					caminho.pop();
+					posicaoAtual = caminho.pop();
+					percurso.pop();
+				}else{
+					posicaoAtual = caminho.pop();					
+				}
 				if( ! visitados.contains(posicaoAtual)){
 					caminho.add(posicaoAtual);
+					percurso.add(posicaoAtual.getNome());
 				}
 			}
 		}
